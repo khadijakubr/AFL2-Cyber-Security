@@ -8,9 +8,9 @@ io.on("connection", (socket) => {
   console.log(`Client ${socket.id} connected`);
 
   socket.on("message", (data) => {
-    const { username, message } = data;
-    message = message + " (sus?)";
-    io.emit("message", { username, message });
+    const { username, message, hash } = data;
+    newMessage = message + " (sus?)";
+    io.emit("message", { username, message: newMessage, hash });
   });
 
     socket.on("disconnect", () => {

@@ -1,5 +1,6 @@
 const io = require("socket.io-client");
 const readline = require("readline");
+const crypto = require("crypto");
 
 const socket = io("http://localhost:3000");
 
@@ -11,6 +12,10 @@ const rl = readline.createInterface({
 
 let username = "";
 
+function sha256(text) {
+  return crypto.createHash("sha256").update(text).digest("hex");
+}
+
 socket.on("connect", () => {
   console.log(`Connected to the server`);
 
@@ -21,7 +26,8 @@ socket.on("connect", () => {
 
     rl.on("line", (message) => {
         if (message.trim()) {
-        socket.emit("message", { username, message });
+        const hash = sha256(message);
+        socket.emit("message", { username, message, hash });
         }
         rl.prompt();
     });
@@ -29,9 +35,15 @@ socket.on("connect", () => {
 });
 
 socket.on("message", (data) => {
-    const { username: senderUsername, message: senderMessage } = data;
+    const { username: senderUsername, message: senderMessage, hash: senderHash } = data;
     if (senderUsername !== username) {
+      const computedHash = sha256(senderMessage);
+      if (computedHash !== senderHash) {
+        console.log(`Warning: the message from ${senderUsername} may have been changed during transmission`);
         console.log(`${senderUsername}: ${senderMessage}`);
+      } else {
+        console.log(`${senderUsername}: ${senderMessage}`);
+      }
     }
     rl.prompt();
 });

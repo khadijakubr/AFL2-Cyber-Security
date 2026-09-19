@@ -8,8 +8,8 @@ io.on("connection", (socket) => {
   console.log(`Client ${socket.id} connected`);
 
   socket.on("message", (data) => {
-    const { username, message } = data;
-    io.emit("message", { username, message });
+    const { username, message, hash } = data;
+    io.emit("message", { username, message, hash });
   });
 
     socket.on("disconnect", () => {
